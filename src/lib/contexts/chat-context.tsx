@@ -73,11 +73,7 @@ export function ChatProvider({
   // In AI SDK v5, server-executed tools don't trigger onToolCall on the client
   // (guarded by providerExecuted flag). Tool parts appear with type "tool-{name}"
   // (e.g. "tool-str_replace_editor") and properties directly on the part object.
-  // We defer the file system updates with setTimeout to avoid triggering re-renders
-  // that could interfere with the active stream reader in useAIChat.
   useEffect(() => {
-    const pending: Array<{ toolName: string; args: any }> = [];
-
     for (const message of messages) {
       if (message.role !== "assistant" || !message.parts) continue;
       for (const part of message.parts) {
@@ -98,17 +94,11 @@ export function ChatProvider({
             p.type === "dynamic-tool"
               ? p.toolName
               : (p.type as string).slice(5); // strip "tool-" prefix
-          pending.push({ toolName, args: p.input });
+          const args =
+            typeof p.input === "string" ? JSON.parse(p.input) : p.input;
+          handleToolCall({ toolName, args });
         }
       }
-    }
-
-    if (pending.length > 0) {
-      // Defer to next microtask so we don't trigger re-renders mid-stream
-      const id = setTimeout(() => {
-        pending.forEach((call) => handleToolCall(call));
-      }, 0);
-      return () => clearTimeout(id);
     }
   }, [messages, handleToolCall]);
 
