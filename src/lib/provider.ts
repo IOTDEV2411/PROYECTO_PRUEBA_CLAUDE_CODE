@@ -82,18 +82,24 @@ export class MockLanguageModel implements LanguageModelV2 {
       yield { type: "text-end", id: textId };
 
       const toolCallId = "call_1";
+      const toolArgs1 = {
+        command: "create",
+        path: `/components/${componentName}.jsx`,
+        file_text: this.getComponentCode(componentType),
+      };
       yield {
         type: "tool-input-start",
         id: toolCallId,
         toolName: "str_replace_editor",
       };
-      const args = JSON.stringify({
-        command: "create",
-        path: `/components/${componentName}.jsx`,
-        file_text: this.getComponentCode(componentType),
-      });
-      yield { type: "tool-input-delta", id: toolCallId, delta: args };
+      yield { type: "tool-input-delta", id: toolCallId, delta: JSON.stringify(toolArgs1) };
       yield { type: "tool-input-end", id: toolCallId };
+      yield {
+        type: "tool-call",
+        toolCallId,
+        toolName: "str_replace_editor",
+        input: JSON.stringify(toolArgs1),
+      };
 
       yield {
         type: "finish",
@@ -119,19 +125,25 @@ export class MockLanguageModel implements LanguageModelV2 {
       yield { type: "text-end", id: textId };
 
       const toolCallId = "call_2";
+      const toolArgs2 = {
+        command: "str_replace",
+        path: `/components/${componentName}.jsx`,
+        old_str: this.getOldStringForReplace(componentType),
+        new_str: this.getNewStringForReplace(componentType),
+      };
       yield {
         type: "tool-input-start",
         id: toolCallId,
         toolName: "str_replace_editor",
       };
-      const args = JSON.stringify({
-        command: "str_replace",
-        path: `/components/${componentName}.jsx`,
-        old_str: this.getOldStringForReplace(componentType),
-        new_str: this.getNewStringForReplace(componentType),
-      });
-      yield { type: "tool-input-delta", id: toolCallId, delta: args };
+      yield { type: "tool-input-delta", id: toolCallId, delta: JSON.stringify(toolArgs2) };
       yield { type: "tool-input-end", id: toolCallId };
+      yield {
+        type: "tool-call",
+        toolCallId,
+        toolName: "str_replace_editor",
+        input: JSON.stringify(toolArgs2),
+      };
 
       yield {
         type: "finish",
@@ -157,18 +169,24 @@ export class MockLanguageModel implements LanguageModelV2 {
       yield { type: "text-end", id: textId };
 
       const toolCallId = "call_3";
+      const toolArgs3 = {
+        command: "create",
+        path: "/App.jsx",
+        file_text: this.getAppCode(componentName),
+      };
       yield {
         type: "tool-input-start",
         id: toolCallId,
         toolName: "str_replace_editor",
       };
-      const args = JSON.stringify({
-        command: "create",
-        path: "/App.jsx",
-        file_text: this.getAppCode(componentName),
-      });
-      yield { type: "tool-input-delta", id: toolCallId, delta: args };
+      yield { type: "tool-input-delta", id: toolCallId, delta: JSON.stringify(toolArgs3) };
       yield { type: "tool-input-end", id: toolCallId };
+      yield {
+        type: "tool-call",
+        toolCallId,
+        toolName: "str_replace_editor",
+        input: JSON.stringify(toolArgs3),
+      };
 
       yield {
         type: "finish",
@@ -459,18 +477,14 @@ export default function App() {
       .join("");
 
     const toolCalls = parts
-      .filter((p) => p.type === "tool-input-start")
+      .filter((p) => p.type === "tool-call")
       .map((p) => {
-        const startPart = p as any;
-        const deltasParts = parts.filter(
-          (d) => d.type === "tool-input-delta" && (d as any).id === startPart.id
-        );
-        const argsStr = deltasParts.map((d) => (d as any).delta).join("");
+        const tc = p as any;
         return {
           type: "tool-call" as const,
-          toolCallId: startPart.id,
-          toolName: startPart.toolName,
-          input: JSON.parse(argsStr),
+          toolCallId: tc.toolCallId,
+          toolName: tc.toolName,
+          input: tc.input,
         };
       });
 
