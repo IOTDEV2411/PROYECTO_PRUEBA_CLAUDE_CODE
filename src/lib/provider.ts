@@ -389,7 +389,7 @@ export default Counter;`;
       case "card":
         return '      <div className="p-6">';
       default:
-        return "  const increment = () => setCount(count + 1);";
+        return "  const increment = () => {\n    setCount(count + 1);\n  };";
     }
   }
 
@@ -400,7 +400,7 @@ export default Counter;`;
       case "card":
         return '      <div className="p-6 hover:bg-gray-50 transition-colors">';
       default:
-        return "  const increment = () => setCount(prev => prev + 1);";
+        return "  const increment = () => {\n    setCount(prev => prev + 1);\n  };";
     }
   }
 

@@ -61,15 +61,13 @@ test("MessageList renders messages with parts", () => {
       parts: [
         { type: "text", text: "Creating your component..." },
         {
-          type: "tool-invocation",
-          toolInvocation: {
-            toolCallId: "asdf",
-            args: {},
-            toolName: "str_replace_editor",
-            state: "result",
-            result: "Success",
-          },
-        },
+          type: "tool-str_replace_editor",
+          toolCallId: "asdf",
+          input: {},
+          state: "output-available",
+          output: "Success",
+          providerExecuted: true,
+        } as any,
       ],
     },
   ];

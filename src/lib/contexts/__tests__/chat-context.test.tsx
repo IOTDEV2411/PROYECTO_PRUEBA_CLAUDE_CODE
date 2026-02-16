@@ -101,7 +101,6 @@ describe("ChatContext", () => {
     expect(useAIChat).toHaveBeenCalledWith(
       expect.objectContaining({
         messages: initialMessages,
-        onToolCall: expect.any(Function),
       })
     );
 
@@ -171,12 +170,28 @@ describe("ChatContext", () => {
     expect(form).toBeDefined();
   });
 
-  test("handles tool calls", () => {
-    let onToolCallHandler: any;
+  test("handles tool calls from message parts", async () => {
+    // AI SDK v5 uses "tool-{name}" part types with input/state directly on the part
+    const messagesWithToolCall = [
+      {
+        id: "1",
+        role: "assistant" as const,
+        parts: [
+          {
+            type: "tool-str_replace_editor",
+            toolCallId: "call_1",
+            state: "output-available",
+            input: { command: "create", path: "/App.jsx", file_text: "test" },
+            output: "File created: /App.jsx",
+            providerExecuted: true,
+          },
+        ],
+      },
+    ];
 
-    (useAIChat as any).mockImplementation((config: any) => {
-      onToolCallHandler = config.onToolCall;
-      return mockUseAIChat;
+    (useAIChat as any).mockReturnValue({
+      ...mockUseAIChat,
+      messages: messagesWithToolCall,
     });
 
     render(
@@ -185,9 +200,11 @@ describe("ChatContext", () => {
       </ChatProvider>
     );
 
-    const toolCall = { toolName: "test", args: {} };
-    onToolCallHandler({ toolCall });
-
-    expect(mockHandleToolCall).toHaveBeenCalledWith(toolCall);
+    await waitFor(() => {
+      expect(mockHandleToolCall).toHaveBeenCalledWith({
+        toolName: "str_replace_editor",
+        args: { command: "create", path: "/App.jsx", file_text: "test" },
+      });
+    });
   });
 });

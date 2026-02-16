@@ -75,13 +75,6 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                                 <span className="text-sm text-neutral-700">{part.reasoning}</span>
                               </div>
                             );
-                          case "tool-invocation":
-                            return (
-                              <ToolCallIndicator
-                                key={partIndex}
-                                toolInvocation={part.toolInvocation}
-                              />
-                            );
                           case "source-url":
                             return (
                               <div key={partIndex} className="mt-2 text-xs text-neutral-500">
@@ -90,8 +83,26 @@ export function MessageList({ messages, isLoading }: MessageListProps) {
                             );
                           case "step-start":
                             return partIndex > 0 ? <hr key={partIndex} className="my-3 border-neutral-200" /> : null;
-                          default:
+                          default: {
+                            // AI SDK v5: tool parts have type "tool-{name}" or "dynamic-tool"
+                            const pType = part.type as string;
+                            if (pType.startsWith("tool-") || pType === "dynamic-tool") {
+                              const p = part as any;
+                              const toolName = pType === "dynamic-tool" ? p.toolName : pType.slice(5);
+                              return (
+                                <ToolCallIndicator
+                                  key={partIndex}
+                                  toolInvocation={{
+                                    toolName,
+                                    args: p.input || {},
+                                    state: p.state === "output-available" ? "result" : p.state,
+                                    result: p.output,
+                                  }}
+                                />
+                              );
+                            }
                             return null;
+                          }
                         }
                       })}
                       {isLoading &&

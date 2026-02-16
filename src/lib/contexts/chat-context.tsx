@@ -7,6 +7,8 @@ import {
   useEffect,
   useState,
   useCallback,
+  useRef,
+  useMemo,
 } from "react";
 import { useChat as useAIChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
@@ -29,31 +31,86 @@ interface ChatContextType {
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
+// Stable reference to avoid re-renders when no initial messages are provided
+const EMPTY_MESSAGES: UIMessage[] = [];
+
 export function ChatProvider({
   children,
   projectId,
-  initialMessages = [],
+  initialMessages,
 }: ChatContextProps & { children: ReactNode }) {
   const { fileSystem, handleToolCall } = useFileSystem();
   const [input, setInput] = useState("");
+  const processedToolCalls = useRef(new Set<string>());
+
+  // Use a ref for initial messages so the value passed to useAIChat never changes
+  // between renders (prevents useAIChat from resetting during FileSystemProvider re-renders).
+  const initialMessagesRef = useRef(initialMessages ?? EMPTY_MESSAGES);
+
+  // Memoize transport so it's not recreated on every render.
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        body: () => ({
+          files: fileSystem.serialize(),
+          projectId,
+        }),
+      }),
+    [fileSystem, projectId]
+  );
 
   const {
     messages,
     sendMessage,
     status,
   } = useAIChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      body: () => ({
-        files: fileSystem.serialize(),
-        projectId,
-      }),
-    }),
-    messages: initialMessages,
-    onToolCall: ({ toolCall }) => {
-      handleToolCall(toolCall);
-    },
+    transport,
+    messages: initialMessagesRef.current,
   });
+
+  // Process tool calls from streamed messages to update the client-side file system.
+  // In AI SDK v5, server-executed tools don't trigger onToolCall on the client
+  // (guarded by providerExecuted flag). Tool parts appear with type "tool-{name}"
+  // (e.g. "tool-str_replace_editor") and properties directly on the part object.
+  // We defer the file system updates with setTimeout to avoid triggering re-renders
+  // that could interfere with the active stream reader in useAIChat.
+  useEffect(() => {
+    const pending: Array<{ toolName: string; args: any }> = [];
+
+    for (const message of messages) {
+      if (message.role !== "assistant" || !message.parts) continue;
+      for (const part of message.parts) {
+        const p = part as any;
+        // Tool parts have type "tool-{toolName}" or "dynamic-tool"
+        const isToolPart =
+          (typeof p.type === "string" && p.type.startsWith("tool-")) ||
+          p.type === "dynamic-tool";
+        if (!isToolPart || !p.toolCallId) continue;
+
+        const state = p.state as string;
+        if (
+          (state === "input-available" || state === "output-available") &&
+          !processedToolCalls.current.has(p.toolCallId)
+        ) {
+          processedToolCalls.current.add(p.toolCallId);
+          const toolName =
+            p.type === "dynamic-tool"
+              ? p.toolName
+              : (p.type as string).slice(5); // strip "tool-" prefix
+          pending.push({ toolName, args: p.input });
+        }
+      }
+    }
+
+    if (pending.length > 0) {
+      // Defer to next microtask so we don't trigger re-renders mid-stream
+      const id = setTimeout(() => {
+        pending.forEach((call) => handleToolCall(call));
+      }, 0);
+      return () => clearTimeout(id);
+    }
+  }, [messages, handleToolCall]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
