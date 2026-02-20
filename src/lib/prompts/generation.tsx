@@ -51,7 +51,24 @@ Before writing any JSX, mentally pick a cohesive palette:
 
 **Layout & Composition — break the template mold:**
 * Do NOT default to a single centered card. Consider: split layouts, sidebar + content, stacked sections, overlapping cards, or full-bleed designs.
-* Add decorative details that create visual richness: a thin gradient line at the top of a card (h-1 bg-gradient-to-r), dot patterns, subtle grid overlays (using pseudo-elements), accent borders (border-l-4), or small colored indicator dots.
+* Add decorative details that create visual richness: dot patterns, subtle grid overlays, accent borders (border-l-4), small colored indicator dots, or ambient glow blobs (absolute blur-3xl bg-indigo-500/20 rounded-full).
 * For groups of items, vary the visual weight — a featured item should be larger or styled differently than its siblings.
-* Use relative + absolute positioning for layered decorative elements like floating badges, glow effects (absolute blur-3xl bg-indigo-500/20 rounded-full), or overlapping shapes.
+* Use relative + absolute positioning for layered decorative elements like floating badges, glow effects, or overlapping shapes.
+
+**Avoid Structural Repetition — every component must feel distinct:**
+* NEVER apply the same skeleton to every component. The glass card + thin top gradient line + backdrop-blur pattern is overused — reserve it for one component type and use different structures for others (e.g. full-bleed hero sections, split panels, stat grids, sidebars).
+* NEVER hardcode the same gradient palette (e.g. violet→fuchsia→cyan) across every component. Pick a fresh accent color combination that fits the component's purpose: amber/orange for energy, emerald/teal for success/finance, rose/pink for lifestyle, sky/cyan for tech.
+* NEVER center everything with flex items-center justify-center and max-w-lg. Vary the layout axis — some components should be full-width, some left-aligned, some grid-based.
+
+**Content must match the request — no generic placeholders:**
+* Use content that is specific and relevant to what the user asked for. If they asked for a pricing component, show real tiers with prices, feature lists, and a recommended badge. If they asked for a dashboard, show real metrics and charts.
+* NEVER use placeholder text like "Amazing Product", "This is a fantastic product", or "Lorem ipsum". Every label, value, and description must feel intentional and fit the component's purpose.
+* For multi-item components (pricing tiers, feature lists, team cards), always render at least 3 items with varied, realistic content.
+
+**Component-type visual patterns — match structure to purpose:**
+* **Pricing / tiers**: Use a horizontal row of 3 cards (grid-cols-3). The middle/recommended card must be visually elevated — larger, has a "Most Popular" badge, uses the primary accent color. Show price, billing period, feature checklist with checkmarks, and a CTA button per tier.
+* **Dashboards / analytics**: Use a grid layout with stat cards (large number + label + trend indicator), a wide chart area, and a sidebar or table. Never center a single card.
+* **Forms / inputs**: Use a two-column layout when space allows (label + description on left, input on right), or a clean stacked layout with section headings that group related fields.
+* **Navigation / headers**: Full-width, use a frosted glass bar (backdrop-blur + bg-white/5 + border-b border-white/10) with logo on the left, nav links centered, and actions on the right.
+* **Lists / feeds**: Alternate between featured (large, full-width, image-heavy) and compact (small, text-only) items to create visual rhythm.
 `;
