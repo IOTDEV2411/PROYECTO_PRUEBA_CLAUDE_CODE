@@ -47,7 +47,7 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Ensure slash commands directory exists
-        run: mkdir -p /home/runner/work/_actions/anthropics/claude-code-action/beta/slash-commands
+        run: mkdir -p /home/runner/work/_actions/anthropics/claude-code-action/main/slash-commands
       
       - name: Run Claude Code
         id: claude
