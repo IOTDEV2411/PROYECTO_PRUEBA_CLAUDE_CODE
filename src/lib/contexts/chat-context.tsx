@@ -24,6 +24,7 @@ interface ChatContextProps {
 interface ChatContextType {
   messages: UIMessage[];
   input: string;
+  setInput: (value: string) => void;
   handleInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   status: string;
@@ -131,6 +132,7 @@ export function ChatProvider({
       value={{
         messages,
         input,
+        setInput,
         handleInputChange,
         handleSubmit,
         status,

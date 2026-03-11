@@ -14,6 +14,7 @@ import { CodeEditor } from "@/components/editor/CodeEditor";
 import { PreviewFrame } from "@/components/preview/PreviewFrame";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HeaderActions } from "@/components/HeaderActions";
+import { Wand2 } from "lucide-react";
 
 interface MainContentProps {
   user?: {
@@ -42,8 +43,13 @@ export function MainContent({ user, project }: MainContentProps) {
             <ResizablePanel id="chat-panel" defaultSize={35} minSize={25} maxSize={50}>
               <div className="h-full flex flex-col bg-white">
                 {/* Chat Header */}
-                <div className="h-14 flex items-center px-6 border-b border-neutral-200/60">
-                  <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">React Component Generator</h1>
+                <div className="h-14 flex items-center px-5 border-b border-neutral-200/60 bg-gradient-to-r from-white to-blue-50/40">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-600 shadow-sm shadow-blue-200">
+                      <Wand2 className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <h1 className="text-[15px] font-semibold text-neutral-900 tracking-tight">React Component Generator</h1>
+                  </div>
                 </div>
 
                 {/* Chat Content */}
@@ -59,16 +65,16 @@ export function MainContent({ user, project }: MainContentProps) {
             <ResizablePanel id="preview-code-panel" defaultSize={65}>
               <div className="h-full flex flex-col bg-white">
                 {/* Top Bar */}
-                <div className="h-14 border-b border-neutral-200/60 px-6 flex items-center justify-between bg-neutral-50/50">
+                <div className="h-14 border-b border-neutral-200/60 px-5 flex items-center justify-between bg-neutral-50/30">
                   <Tabs
                     value={activeView}
                     onValueChange={(v) =>
                       setActiveView(v as "preview" | "code")
                     }
                   >
-                    <TabsList className="bg-white/60 border border-neutral-200/60 p-0.5 h-9 shadow-sm">
-                      <TabsTrigger value="preview" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-600 px-4 py-1.5 text-sm font-medium transition-all">Preview</TabsTrigger>
-                      <TabsTrigger value="code" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-600 px-4 py-1.5 text-sm font-medium transition-all">Code</TabsTrigger>
+                    <TabsList className="bg-neutral-100/80 border border-neutral-200/60 p-0.5 h-8 shadow-none gap-0.5">
+                      <TabsTrigger value="preview" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-500 px-4 py-1 text-[13px] font-medium transition-all rounded-md">Preview</TabsTrigger>
+                      <TabsTrigger value="code" className="data-[state=active]:bg-white data-[state=active]:text-neutral-900 data-[state=active]:shadow-sm text-neutral-500 px-4 py-1 text-[13px] font-medium transition-all rounded-md">Code</TabsTrigger>
                     </TabsList>
                   </Tabs>
                   <HeaderActions user={user} projectId={project?.id} />

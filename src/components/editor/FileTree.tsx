@@ -89,10 +89,14 @@ export function FileTree() {
 
   if (!rootNode || !rootNode.children || rootNode.children.size === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full p-4 text-center">
-        <Folder className="h-12 w-12 text-gray-300 mb-3" />
-        <p className="text-sm text-gray-500">No files yet</p>
-        <p className="text-xs text-gray-400 mt-1">Files will appear here</p>
+      <div className="flex flex-col h-full">
+        <div className="h-9 flex items-center px-3 border-b border-neutral-200/60">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">Files</span>
+        </div>
+        <div className="flex flex-col items-center justify-center flex-1 p-4 text-center">
+          <Folder className="h-8 w-8 text-neutral-300 mb-2" />
+          <p className="text-xs text-neutral-500">No files yet</p>
+        </div>
       </div>
     );
   }
@@ -105,12 +109,17 @@ export function FileTree() {
   });
 
   return (
-    <ScrollArea className="h-full">
-      <div className="py-2" key={refreshTrigger}>
-        {rootChildren.map((child) => (
-          <FileTreeNode key={child.path} node={child} level={0} />
-        ))}
+    <div className="flex flex-col h-full">
+      <div className="h-9 flex items-center px-3 border-b border-neutral-200/60 flex-shrink-0">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">Files</span>
       </div>
-    </ScrollArea>
+      <ScrollArea className="flex-1">
+        <div className="py-1.5" key={refreshTrigger}>
+          {rootChildren.map((child) => (
+            <FileTreeNode key={child.path} node={child} level={0} />
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }

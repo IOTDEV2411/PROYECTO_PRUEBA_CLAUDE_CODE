@@ -6,20 +6,41 @@ import { User, Bot, Loader2 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 import { ToolCallIndicator } from "./ToolCallIndicator";
 
+const EXAMPLE_PROMPTS = [
+  "A pricing card with a highlighted plan",
+  "A login form with email and password",
+  "A responsive navigation bar",
+  "A data table with sorting",
+  "A notification toast component",
+  "A profile avatar with status badge",
+];
+
 interface MessageListProps {
   messages: UIMessage[];
   isLoading?: boolean;
+  onPromptSelect?: (prompt: string) => void;
 }
 
-export function MessageList({ messages, isLoading }: MessageListProps) {
+export function MessageList({ messages, isLoading, onPromptSelect }: MessageListProps) {
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full px-4 text-center">
-        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 mb-4 shadow-sm">
-          <Bot className="h-7 w-7 text-blue-600" />
+      <div className="flex flex-col items-center justify-center h-full px-4 py-8 text-center">
+        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600 mb-4 shadow-sm shadow-blue-200">
+          <Bot className="h-6 w-6 text-white" />
         </div>
-        <p className="text-neutral-900 font-semibold text-lg mb-2">Start a conversation to generate React components</p>
-        <p className="text-neutral-500 text-sm max-w-sm">I can help you create buttons, forms, cards, and more</p>
+        <p className="text-neutral-900 font-semibold text-base mb-1.5">Generate React components with AI</p>
+        <p className="text-neutral-500 text-sm max-w-xs mb-6">Describe what you want to build and I&apos;ll create it instantly</p>
+        <div className="flex flex-wrap gap-2 justify-center max-w-xs">
+          {EXAMPLE_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              onClick={() => onPromptSelect?.(prompt)}
+              className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-full transition-colors cursor-pointer"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
       </div>
     );
   }
